@@ -35,8 +35,7 @@ extension UIViewController {
     
     public func MotionToast(message: String, toastType: ToastType, duration: ToastDuration? = .short, toastStyle: ToastStyle? = .style_vibrant, toastGravity: ToastGravity? = .bottom, toastCornerRadius: Int? = 0, pulseEffect: Bool? = true) {
         
-        guard let window = UIApplication.shared.connectedScenes.filter({$0.activationState == .foregroundActive}).map({$0 as? UIWindowScene})
-                                .compactMap({$0}).first?.windows.filter({$0.isKeyWindow}).first else { return }
+		guard let window = UIApplication.shared.windows.filter({$0.isKeyWindow}).first else { return }
         
         var toastDuration = 2.0
         switch duration {
@@ -66,8 +65,7 @@ extension UIViewController {
                                           duration: ToastDuration? = .short, toastStyle: ToastStyle? = .style_vibrant,
                                           toastGravity: ToastGravity? = .bottom, toastCornerRadius: Int? = 0, pulseEffect: Bool? = true) {
         
-        guard let window = UIApplication.shared.connectedScenes.filter({$0.activationState == .foregroundActive}).map({$0 as? UIWindowScene})
-                                .compactMap({$0}).first?.windows.filter({$0.isKeyWindow}).first else { return }
+		guard let window = UIApplication.shared.windows.filter({$0.isKeyWindow}).first else { return }
         
         var toastDuration = 2.0
         switch duration {
