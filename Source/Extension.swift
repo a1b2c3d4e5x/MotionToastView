@@ -18,52 +18,78 @@ public enum ToastType {
 public enum ToastDuration {
     case short
     case long
+	
+	public var duration: TimeInterval {
+		get {
+			switch self {
+			case .long:
+				return 4.0
+			case .short:
+				return 2.0
+			}
+		}
+	}
 }
 
 public enum ToastGravity {
-    case top
-    case centre
-    case bottom
+	case top
+	case centre
+	case bottom
+	
+	public func rect(offset: CGPoint = .zero) -> CGRect {
+		let size: CGSize = UIScreen.main.bounds.size
+		switch self {
+		case .top:
+			return CGRect(x: 0.0 + offset.x, y: 80.0 + offset.y, width: size.width, height: 83.0)
+		case .centre:
+			return CGRect(x: 0.0 + offset.x, y: ((size.height / 2) - 41) + offset.y, width: size.width, height: 83.0)
+		case .bottom:
+			return CGRect(x: 0.0 + offset.x, y: (size.height - 190.0) + offset.y, width: size.width, height: 83.0)
+		}
+	}
 }
 
 public enum ToastStyle {
     case style_vibrant
     case style_pale
+	
+	public func create(message: String,
+				toastType: ToastType,
+				toastGravity: ToastGravity,
+				toastCornerRadius: Int,
+				pulseEffect: Bool) -> UIView {
+		switch self {
+			case .style_vibrant:
+				let gravity: CGRect = toastGravity.rect()
+				let toastView = MTVibrant(frame: gravity)
+				toastView.setupViews(toastType: toastType)
+				if pulseEffect { toastView.addPulseEffect() }
+				toastView.msgLabel.text = message
+				toastView.toastView.layer.cornerRadius = CGFloat(toastCornerRadius)
+				return toastView
+			
+			case .style_pale:
+				let gravity: CGRect = toastGravity.rect()
+				let toastView = MTPale(frame: gravity)
+				toastView.setupViews(toastType: toastType)
+				if pulseEffect { toastView.addPulseEffect() }
+				toastView.msgLabel.text = message
+				return toastView
+		}
+	}
 }
 
 extension UIViewController {
     
-    public func MotionToast(message: String, toastType: ToastType, duration: ToastDuration? = .short, toastStyle: ToastStyle? = .style_vibrant, toastGravity: ToastGravity? = .bottom, toastCornerRadius: Int? = 0, pulseEffect: Bool? = true) {
-        
-		guard let window = UIApplication.shared.windows.filter({$0.isKeyWindow}).first else { return }
-        
-        var toastDuration = 2.0
-        switch duration {
-            case .short: toastDuration = 2.0;break
-            case .long: toastDuration = 4.0;break
-            case .none: break
-        }
-        
-        var toastView: UIView?
-        switch toastStyle {
-            case .style_vibrant: toastView = toastStyle_vibrant(message: message, toastType: toastType, toastGravity: toastGravity!, toastCornerRadius: toastCornerRadius!, view: view, pulseEffect: pulseEffect!);break
-            case .style_pale: toastView = toastStyle_pale(message: message, toastType: toastType, toastGravity: toastGravity!, view: view, pulseEffect: pulseEffect!);break
-            case .none: break
-        }
-        
-        window.addSubview(toastView!)
-        
-        UIView.animate(withDuration: 1.0, delay: toastDuration, animations: {
-            toastView!.alpha = 0
-        }) { (_) in
-            toastView!.removeFromSuperview()
-        }
+	public func MotionToast(message: String, toastType: ToastType, duration: ToastDuration? = .short, toastStyle: ToastStyle? = .style_vibrant, toastGravity: ToastGravity? = .bottom, toastCornerRadius: Int? = 0, pulseEffect: Bool? = true) {
+
+		//MotionToastView.MotionToast.show(message: message, toastType: toastType, duration: duration, toastStyle: toastStyle, toastGravity: toastGravity, toastCornerRadius: toastCornerRadius, pulseEffect: pulseEffect)
     }
     
     public func MotionToast_Customisation(header: String, message: String, headerColor: UIColor, messageColor: UIColor,
                                           primary_color: UIColor, secondary_color: UIColor, icon_image: UIImage,
                                           duration: ToastDuration? = .short, toastStyle: ToastStyle? = .style_vibrant,
-                                          toastGravity: ToastGravity? = .bottom, toastCornerRadius: Int? = 0, pulseEffect: Bool? = true) {
+										  toastGravity: ToastGravity? = .bottom, toastCornerRadius: Int? = 0, pulseEffect: Bool? = true) {
         
 		guard let window = UIApplication.shared.windows.filter({$0.isKeyWindow}).first else { return }
         
@@ -77,20 +103,11 @@ extension UIViewController {
         var toastUIView: UIView?
         switch toastStyle {
             case .style_vibrant:
-                
-                var gravity = CGRect(x: 0.0, y: view.frame.height - 130.0, width: view.frame.width, height: 83.0)
-                switch toastGravity! {
-                    case .top: gravity = CGRect(x: 0.0, y: 80.0, width: view.frame.width, height: 83.0);break
-                    case .centre: gravity = CGRect(x: 0.0, y: ((view.frame.height / 2) - 41) , width: view.frame.width, height: 83.0);break
-                    case .bottom: gravity = CGRect(x: 0.0, y: view.frame.height - 130.0, width: view.frame.width, height: 83.0);break
-                }
-                
+				let gravity: CGRect = toastGravity!.rect()
                 let toastView = MTVibrant(frame: gravity)
                 if pulseEffect! { toastView.addPulseEffect() }
                 toastView.toastView.layer.cornerRadius = CGFloat(toastCornerRadius!)
-                
-                toastView.headLabel.text = header
-                toastView.headLabel.textColor = headerColor
+				
                 toastView.msgLabel.text = message
                 toastView.msgLabel.textColor = messageColor
                 toastView.circleImg.image = icon_image
@@ -100,14 +117,7 @@ extension UIViewController {
                 break
             
             case .style_pale:
-                
-                var gravity = CGRect(x: 0.0, y: view.frame.height - 130.0, width: view.frame.width, height: 83.0)
-                switch toastGravity! {
-                    case .top: gravity = CGRect(x: 0.0, y: 80.0, width: view.frame.width, height: 83.0);break
-                    case .centre: gravity = CGRect(x: 0.0, y: ((view.frame.height / 2) - 41) , width: view.frame.width, height: 83.0);break
-                    case .bottom: gravity = CGRect(x: 0.0, y: view.frame.height - 130.0, width: view.frame.width, height: 83.0);break
-                }
-                
+				let gravity: CGRect = toastGravity!.rect()
                 let toastView = MTPale(frame: gravity)
                 if pulseEffect! { toastView.addPulseEffect() }
                 toastView.toastView.layer.cornerRadius = CGFloat(toastCornerRadius!)
@@ -133,37 +143,4 @@ extension UIViewController {
             toastUIView!.removeFromSuperview()
         }
     }
-}
-
-func toastStyle_vibrant(message: String, toastType: ToastType, toastGravity: ToastGravity, toastCornerRadius: Int, view: UIView, pulseEffect: Bool) -> MTVibrant {
-    
-    var gravity = CGRect(x: 0.0, y: view.frame.height - 130.0, width: view.frame.width, height: 83.0)
-    switch toastGravity {
-        case .top: gravity = CGRect(x: 0.0, y: 80.0, width: view.frame.width, height: 83.0);break
-        case .centre: gravity = CGRect(x: 0.0, y: ((view.frame.height / 2) - 41) , width: view.frame.width, height: 83.0);break
-        case .bottom: gravity = CGRect(x: 0.0, y: view.frame.height - 130.0, width: view.frame.width, height: 83.0);break
-    }
-    
-    let toastView = MTVibrant(frame: gravity)
-    toastView.setupViews(toastType: toastType)
-    if pulseEffect { toastView.addPulseEffect() }
-    toastView.msgLabel.text = message
-    toastView.toastView.layer.cornerRadius = CGFloat(toastCornerRadius)
-    return toastView
-}
-
-func toastStyle_pale(message: String, toastType: ToastType, toastGravity: ToastGravity, view: UIView, pulseEffect: Bool) -> MTPale {
-    
-    var gravity = CGRect(x: 0.0, y: view.frame.height - 130.0, width: view.frame.width, height: 83.0)
-    switch toastGravity {
-        case .top: gravity = CGRect(x: 0.0, y: 80.0, width: view.frame.width, height: 83.0);break
-        case .centre: gravity = CGRect(x: 0.0, y: ((view.frame.height / 2) - 41) , width: view.frame.width, height: 83.0);break
-        case .bottom: gravity = CGRect(x: 0.0, y: view.frame.height - 130.0, width: view.frame.width, height: 83.0);break
-    }
-    
-    let toastView = MTPale(frame: gravity)
-    toastView.setupViews(toastType: toastType)
-    if pulseEffect { toastView.addPulseEffect() }
-    toastView.msgLabel.text = message
-    return toastView
 }

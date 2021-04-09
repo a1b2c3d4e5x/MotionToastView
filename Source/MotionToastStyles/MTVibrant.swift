@@ -10,7 +10,6 @@ import UIKit
 
 class MTVibrant: UIView {
     
-    @IBOutlet weak var headLabel: UILabel!
     @IBOutlet weak var msgLabel: UILabel!
     @IBOutlet weak var circleImg: UIImageView!
     @IBOutlet weak var toastView: UIView!
@@ -18,21 +17,37 @@ class MTVibrant: UIView {
     
     override init(frame: CGRect) {
         super.init(frame: frame)
-        commonInit()
-        circleView.layer.cornerRadius = circleView.bounds.size.width/2
+		self.commonInit()
+		self.addBlurView()
+		
+		self.toastView.clipsToBounds = true
+		self.circleView.layer.cornerRadius = self.circleView.bounds.size.width/2
     }
     
     required init?(coder: NSCoder) {
         super.init(coder: coder)
-        commonInit()
+		self.commonInit()
+		self.addBlurView()
     }
     
     func commonInit() {
         let bundle = Bundle(for: MTVibrant.self)
         let viewFromXib = bundle.loadNibNamed("MTVibrant", owner: self, options: nil)![0] as! UIView
         viewFromXib.frame = self.bounds
-        addSubview(viewFromXib)
+		self.addSubview(viewFromXib)
     }
+	
+	func addBlurView() {
+		let blurEffect = UIBlurEffect(style: .prominent)
+		let blurView = UIVisualEffectView(effect: blurEffect)
+		self.toastView.insertSubview(blurView, at: 0)
+		
+		blurView.translatesAutoresizingMaskIntoConstraints = false
+		blurView.topAnchor.constraint(equalTo: self.toastView.topAnchor).isActive = true
+		blurView.bottomAnchor.constraint(equalTo: self.toastView.bottomAnchor).isActive = true
+		blurView.leadingAnchor.constraint(equalTo: self.toastView.leadingAnchor).isActive = true
+		blurView.trailingAnchor.constraint(equalTo: self.toastView.trailingAnchor).isActive = true
+	}
     
     func addPulseEffect() {
         let pulseAnimation = CABasicAnimation(keyPath: "transform.scale")
@@ -42,36 +57,40 @@ class MTVibrant: UIView {
         pulseAnimation.timingFunction = CAMediaTimingFunction(name: CAMediaTimingFunctionName.easeInEaseOut)
         pulseAnimation.autoreverses = true
         pulseAnimation.repeatCount = .greatestFiniteMagnitude
-        circleImg.layer.add(pulseAnimation, forKey: "animateOpacity")
+		self.circleImg.layer.add(pulseAnimation, forKey: "animateOpacity")
     }
     
+	func configureMask(view: UIView, with image: UIImage){
+		let masklayer = CALayer()
+		masklayer.frame.origin = CGPoint(x: 0, y: 0 )
+		masklayer.frame.size = view.frame.size
+		masklayer.contents = image.cgImage
+		view.layer.mask = masklayer
+	}
+
     func setupViews(toastType: ToastType) {
+		self.toastView.backgroundColor = nil
+		
         switch toastType {
             case .success:
-                headLabel.text = "Success"
-                headLabel.textColor = loadColor(name: "white_green")
-                circleImg.image = loadImage(name: "success_icon")
-                toastView.backgroundColor = loadColor(name: "green_dark")
+				self.circleImg.image = self.loadImage(name: "success_icon_white")
+				self.circleView.backgroundColor = self.loadColor(name: "green")
                 break
             case .error:
-                headLabel.text = "Error"
-                headLabel.textColor = loadColor(name: "white_red")
-                circleImg.image = loadImage(name: "error_icon")
-                toastView.backgroundColor = loadColor(name: "red_dark")
+				self.circleImg.image = self.loadImage(name: "error_icon_white")
+				self.circleView.backgroundColor = self.loadColor(name: "red")
                 break
             case .warning:
-                headLabel.text = "Warning"
-                headLabel.textColor = loadColor(name: "white_yellow")
-                circleImg.image = loadImage(name: "warning_icon")
-                toastView.backgroundColor = loadColor(name: "yellow_dark")
+				self.circleImg.image = self.loadImage(name: "warning_icon_white")
+				self.circleView.backgroundColor = self.loadColor(name: "yellow")
                 break
             case .info:
-                headLabel.text = "Info"
-                headLabel.textColor = loadColor(name: "white_blue")
-                circleImg.image = loadImage(name: "info_icon")
-                toastView.backgroundColor = loadColor(name: "blue_dark")
+				self.circleImg.image = self.loadImage(name: "info_icon_white")
+				self.circleView.backgroundColor = self.loadColor(name: "blue")
                 break
-        }
+		}
+		
+		let x = self.loadColor(name: "white_black")
     }
     
     func loadImage(name: String) -> UIImage? {
@@ -92,3 +111,4 @@ class MTVibrant: UIView {
         return nil
     }
 }
+

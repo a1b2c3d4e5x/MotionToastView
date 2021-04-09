@@ -19,23 +19,40 @@ class MTPale: UIView {
     
     override init(frame: CGRect) {
         super.init(frame: frame)
-        commonInit()
-        sideBarView.layer.cornerRadius = 3
-        toastView.layer.cornerRadius = 12
-        circleView.layer.cornerRadius = circleView.bounds.size.width/2
+		self.commonInit()
+		self.addBlurView()
+		
+		self.toastView.clipsToBounds = true
+		self.sideBarView.layer.cornerRadius = 3
+		self.toastView.layer.cornerRadius = 12
+		self.toastView.layer.maskedCorners = [.layerMaxXMaxYCorner, .layerMaxXMinYCorner]
+		self.circleView.layer.cornerRadius = self.circleView.bounds.size.width/2
     }
     
     required init?(coder: NSCoder) {
         super.init(coder: coder)
-        commonInit()
+		self.commonInit()
+		self.addBlurView()
     }
     
     func commonInit() {
         let bundle = Bundle(for: MTPale.self)
         let viewFromXib = bundle.loadNibNamed("MTPale", owner: self, options: nil)![0] as! UIView
         viewFromXib.frame = self.bounds
-        addSubview(viewFromXib)
+		self.addSubview(viewFromXib)
     }
+	
+	func addBlurView() {
+		let blurEffect = UIBlurEffect(style: .prominent)
+		let blurView = UIVisualEffectView(effect: blurEffect)
+		self.toastView.insertSubview(blurView, at: 0)
+		
+		blurView.translatesAutoresizingMaskIntoConstraints = false
+		blurView.topAnchor.constraint(equalTo: self.toastView.topAnchor).isActive = true
+		blurView.bottomAnchor.constraint(equalTo: self.toastView.bottomAnchor).isActive = true
+		blurView.leadingAnchor.constraint(equalTo: self.toastView.leadingAnchor).isActive = true
+		blurView.trailingAnchor.constraint(equalTo: self.toastView.trailingAnchor).isActive = true
+	}
     
     func addPulseEffect() {
         let pulseAnimation = CABasicAnimation(keyPath: "transform.scale")
@@ -45,38 +62,38 @@ class MTPale: UIView {
         pulseAnimation.timingFunction = CAMediaTimingFunction(name: CAMediaTimingFunctionName.easeInEaseOut)
         pulseAnimation.autoreverses = true
         pulseAnimation.repeatCount = .greatestFiniteMagnitude
-        circleImg.layer.add(pulseAnimation, forKey: "animateOpacity")
+		self.circleImg.layer.add(pulseAnimation, forKey: "animateOpacity")
     }
     
     func setupViews(toastType: ToastType) {
         switch toastType {
             case .success:
-                headLabel.text = "Success"
-                circleImg.image = loadImage(name: "success_icon_white")
-                sideBarView.backgroundColor = UIColor(red: 242.0, green: 201.0, blue: 76.0, alpha: 1.0)
-                circleView.backgroundColor = UIColor(red: 242.0, green: 201.0, blue: 76.0, alpha: 1.0)
-                toastView.backgroundColor = loadColor(name: "alpha_green_dark")
+				self.headLabel.text = "Success"
+				self.circleImg.image = loadImage(name: "success_icon_white")
+				self.sideBarView.backgroundColor = loadColor(name: "green")
+				self.circleView.backgroundColor = loadColor(name: "green")
+				self.toastView.backgroundColor = loadColor(name: "alpha_green_dark")
                 break
             case .error:
-                headLabel.text = "Error"
-                circleImg.image = loadImage(name: "error_icon_white")
-                sideBarView.backgroundColor = UIColor(red: 235.0, green: 87.0, blue: 87.0, alpha: 1.0)
-                circleView.backgroundColor = UIColor(red: 235.0, green: 87.0, blue: 87.0, alpha: 1.0)
-                toastView.backgroundColor = loadColor(name: "alpha_red_dark")
+				self.headLabel.text = "Error"
+				self.circleImg.image = loadImage(name: "error_icon_white")
+				self.sideBarView.backgroundColor = loadColor(name: "red")
+				self.circleView.backgroundColor = loadColor(name: "red")
+				self.toastView.backgroundColor = loadColor(name: "alpha_red_dark")
                 break
             case .warning:
-                headLabel.text = "Warning"
-                circleImg.image = loadImage(name: "warning_icon_white")
-                sideBarView.backgroundColor = UIColor(red: 242.0, green: 201.0, blue: 76.0, alpha: 1.0)
-                circleView.backgroundColor = UIColor(red: 242.0, green: 201.0, blue: 76.0, alpha: 1.0)
-                toastView.backgroundColor = loadColor(name: "alpha_yellow_dark")
+				self.headLabel.text = "Warning"
+				self.circleImg.image = loadImage(name: "warning_icon_white")
+				self.sideBarView.backgroundColor = loadColor(name: "yellow")
+				self.circleView.backgroundColor = loadColor(name: "yellow")
+				self.toastView.backgroundColor = loadColor(name: "alpha_yellow_dark")
                 break
             case .info:
-                headLabel.text = "Info"
-                circleImg.image = loadImage(name: "info_icon_white")
-                sideBarView.backgroundColor = UIColor(red: 47.0, green: 128.0, blue: 237.0, alpha: 1.0)
-                circleView.backgroundColor = UIColor(red: 47.0, green: 128.0, blue: 237.0, alpha: 1.0)
-                toastView.backgroundColor = loadColor(name: "alpha_blue_dark")
+				self.headLabel.text = "Info"
+				self.circleImg.image = loadImage(name: "info_icon_white")
+				self.sideBarView.backgroundColor = loadColor(name: "blue")
+				self.circleView.backgroundColor = loadColor(name: "blue")
+				self.toastView.backgroundColor = loadColor(name: "alpha_blue_dark")
                 break
         }
     }
